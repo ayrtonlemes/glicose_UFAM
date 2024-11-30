@@ -1,0 +1,25 @@
+[
+    {
+      "id": 1,
+      "name": "John Doe",
+      "age": 45,
+      "gender": "Male",
+      "metrics": {
+        "heartRate": "75 bpm",
+        "bloodPressure": "120/80 mmHg",
+        "oxygenSaturation": "98%"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "age": 30,
+      "gender": "Female",
+      "metrics": {
+        "heartRate": "82 bpm",
+        "bloodPressure": "110/70 mmHg",
+        "oxygenSaturation": "99%"
+      }
+    }
+  ]
+  
