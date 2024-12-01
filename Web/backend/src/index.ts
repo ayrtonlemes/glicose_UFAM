@@ -63,7 +63,7 @@ app.get("/food_logs/:id_patient", (req: Request, res: Response):void => {
     const dataPath = path.join(__dirname, '', 'patientsbd.json');
     const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
-    const foodLogs = data.food_log.filter((log) => log.id_patient === idPatient);
+    const foodLogs = data.food_log.filter((log: any) => log.id_patient === idPatient);
   
     if (foodLogs.length === 0) {
       res.status(404).json({ message: "Nenhum food_log encontrado para este paciente." });

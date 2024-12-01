@@ -5,6 +5,7 @@ import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead
 import { getPatientById, PatientData } from "../../services/getPatientById";
 import { usePathname } from "next/navigation";
 import CaloriesGraphBar from "@/app/components/CaloriesGraph";
+import LineGraph from "@/app/components/LineGraph";
 
 const PatientDetails = () => {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
@@ -84,38 +85,18 @@ const PatientDetails = () => {
             ))}
           </TableBody>
         </Table>
+          <LineGraph></LineGraph>
       </TableContainer>
 
       <TableContainer component={Paper} style={{ marginBottom: "2rem" }}>
         <Typography variant="h6" gutterBottom>
           Registro Alimentar
         </Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Data</TableCell>
-              <TableCell>Hora Início</TableCell>
-              <TableCell>Hora Fim</TableCell>
-              <TableCell>Alimento</TableCell>
-              <TableCell>Calorias</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {patientData?.food_log.map((fl, index) => (
-              <TableRow key={index}>
-                <TableCell>{fl.date.join(", ")}</TableCell>
-                <TableCell>{fl.time_begin.join(", ")}</TableCell>
-                <TableCell>{fl.time_end.join(", ")}</TableCell>
-                <TableCell>{fl.logged_food.join(", ")}</TableCell>
-                <TableCell>{fl.calories.join(", ")}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+
       <CaloriesGraphBar>
         
       </CaloriesGraphBar>
+      </TableContainer>
       <TableContainer component={Paper}>
         <Typography variant="h6" gutterBottom>
           Dados dos Sensores
