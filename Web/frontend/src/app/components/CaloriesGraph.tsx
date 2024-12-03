@@ -6,6 +6,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import { BarChart } from '@mui/x-charts/BarChart';
+import mockedCaloriesPatients from "../mocks/patient001_food_log.json"
 
 export default function CaloriesGraphBar() {
   const [itemNb, setItemNb] = React.useState(5); 
@@ -18,6 +19,20 @@ export default function CaloriesGraphBar() {
     }
     setItemNb(newValue);
   };
+  
+
+  const patientFoodLog = [
+    { label: "calorie", data: mockedCaloriesPatients.map((row) => row.calorie || 0) },
+    { label: "total_carb", data: mockedCaloriesPatients.map((row) => row.total_carb || 0) },
+    { label: "dietary_fiber", data: mockedCaloriesPatients.map((row) => row.dietary_fiber || 0) },
+    { label: "sugar", data: mockedCaloriesPatients.map((row) => row.sugar || 0) },
+    { label: "protein", data: mockedCaloriesPatients.map((row) => row.protein || 0) },
+    { label: "total_fat", data: mockedCaloriesPatients.map((row) => row.total_fat || 0) },
+  ].map((s) => ({
+    ...s,  
+    highlightScope: { highlight: "series", fade: "global"} as const,
+    xAxis: mockedCaloriesPatients.map((row) => row.date || ""),
+  }));
 
   const handleCheckboxChange = (label: string) => {
     setSelectedSeries((prevSelected) =>
@@ -27,7 +42,7 @@ export default function CaloriesGraphBar() {
     );
   };
 
-  const filteredSeries = series
+  const filteredSeries = patientFoodLog
     .filter((s) => selectedSeries.includes(s.label))
     .map((s) => ({
       ...s,
@@ -40,7 +55,7 @@ export default function CaloriesGraphBar() {
       Selecione as variáveis
     </Typography>
     <FormGroup>
-      {series.map((s) => (
+      {patientFoodLog.map((s) => (
         <FormControlLabel
           key={s.label}
           control={
@@ -76,41 +91,11 @@ export default function CaloriesGraphBar() {
         onChange={handleItemNbChange}
         valueLabelDisplay="auto"
         min={1}
-        max={20}
+        max={mockedCaloriesPatients.length}
         aria-labelledby="input-item-number"
       />
     </Box>
   );
 }
 
-const highlightScope = {
-  highlight: 'series',
-  fade: 'global',
-} as const;
 
-const series = [
-  {
-    label: 'calorie',
-    data: [2423, 2210, 764, 1879, 1478, 1373, 1891, 2171, 620, 1269, 724, 1707],
-  },
-  {
-    label: 'total_carb',
-    data: [2362, 2254, 1962, 1336, 586, 1069, 2194, 1629, 2173, 2031, 1757],
-  },
-  {
-    label: 'dietary_fiber',
-    data: [1145, 1214, 975, 2266, 1768, 2341, 747, 1282, 1780, 1766, 2115],
-  },
-  {
-    label: 'sugar',
-    data: [2361, 979, 2430, 1768, 1913, 2342, 1868, 1319, 1038, 2139, 1691],
-  },
-  {
-    label: 'protein',
-    data: [968, 1371, 1381, 1060, 1327, 934, 1779, 1361, 878, 1055, 1737],
-  },
-  {
-    label: 'total_fat',
-    data: [2316, 1845, 2057, 1479, 1859, 1015, 1569, 1448, 1354, 1007, 799],
-  },
-].map((s) => ({ ...s, highlightScope }));

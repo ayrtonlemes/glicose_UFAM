@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from "react";
 
-import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { getPatientById, PatientData } from "../../services/getPatientById";
 import { usePathname } from "next/navigation";
 import CaloriesGraphBar from "@/app/components/CaloriesGraph";
@@ -11,10 +11,13 @@ const PatientDetails = () => {
   const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
 
   const pathname = usePathname();
 
+  const handleSensorChange = (event: SelectChangeEvent) => {
+    setSelectedSensor(event.target.value as string);
+  }
 
   const id = pathname ? pathname.split("/").filter(Boolean).pop() : null;
   useEffect(() => {
@@ -61,31 +64,24 @@ const PatientDetails = () => {
 
       <TableContainer component={Paper} style={{ marginBottom: "2rem" }}>
         <Typography variant="h6" gutterBottom>
-          Dados de Variabilidade Cardíaca
+          Dados de sensores cardíacos
         </Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Data</TableCell>
-              <TableCell>Hora</TableCell>
-              <TableCell>SDNN</TableCell>
-              <TableCell>RMSSD</TableCell>
-              <TableCell>LF/HF</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {patientData?.patient_data.map((pd, index) => (
-              <TableRow key={index}>
-                <TableCell>{pd.date.join(", ")}</TableCell>
-                <TableCell>{pd.time.join(", ")}</TableCell>
-                <TableCell>{pd.SDNN.join(", ")}</TableCell>
-                <TableCell>{pd.RMSSD.join(", ")}</TableCell>
-                <TableCell>{pd.LF_HF.join(", ")}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-          <LineGraph></LineGraph>
+        <Box>
+          <FormControl sx ={{m: 1, minWidth: 120}}>
+            <InputLabel id="sensor-select-label">Escolha o sensor</InputLabel>
+            <Select 
+              labelId="sensor-select-label"
+              value={selectedSensor}
+              onChange={handleSensorChange}
+              label="Escolha um sensor"
+            >
+              <MenuItem value="IBI">IBI</MenuItem>
+              <MenuItem value="HR">HR</MenuItem>
+              <MenuItem value="BVP">BVP</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+          <LineGraph sensor={selectedSensor}></LineGraph>
       </TableContainer>
 
       <TableContainer component={Paper} style={{ marginBottom: "2rem" }}>

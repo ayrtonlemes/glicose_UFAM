@@ -1,52 +1,82 @@
 import React from "react";
-import { VictoryChart, VictoryLine, VictoryTheme, VictoryAxis, VictoryTooltip, VictoryVoronoiContainer } from "victory";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+import patientsData from "../mocks/patient001_hr.json"
+import patientIBI from "../mocks/patient001_ibi.json"
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
-const LineGraph = () => {
-  // Dados de exemplo com timestamps (substitua pelos seus CSVs)
-  const data = [
-    { x: new Date(2024, 10, 1, 8, 0), y: 75 }, // Timestamp: 01/11/2024 08:00
-    { x: new Date(2024, 10, 1, 9, 0), y: 78 },
-    { x: new Date(2024, 10, 1, 10, 0), y: 80 },
-    { x: new Date(2024, 10, 1, 11, 0), y: 76 },
-    { x: new Date(2024, 10, 1, 12, 0), y: 82 },
-  ];
+interface SelectedSensorProps {
+  sensor: string | undefined
+}
+const LineGraph = (selectedSensor: SelectedSensorProps) => {
+  
+  //Fazer verificação de qual sensor foi selecionado
+  let mockData = selectedSensor.sensor === "HR" ? patientsData.slice(0,400) : patientIBI.slice(0,400); //Selecionado o 
+  let patientValues = selectedSensor.sensor === "HR" ? mockData.map((item) => item.value) : mockData.map((item) => item.ibi);
 
-  return (
-    <VictoryChart
-      theme={VictoryTheme.material} // Tema padrão
-      containerComponent={
-        <VictoryVoronoiContainer
-          labels={({ datum }) => `Time: ${datum.x.toLocaleTimeString()} \n Value: ${datum.y}`}
-          labelComponent={<VictoryTooltip />}
-        />
-      }
-    >
-      <VictoryAxis
-        tickFormat={(t) => `${t}:00`} // Formata timestamps no eixo X
-        style={{
-          tickLabels: { fontSize: 6, padding: 5 },
-        }}
-      />
-      <VictoryAxis
-        dependentAxis
-        style={{
-          tickLabels: { fontSize: 6, padding: 5 },
-        }}
-      />
-      <VictoryLine
-        data={data}
-        interpolation="natural" // Suaviza as linhas
-        style={{
-          data: { stroke: "#c43a31", strokeWidth: 2 },
-          labels: { fontSize: 5 },
-        }}
-        animate={{
-          duration: 2000,
-          onLoad: { duration: 1000 }, // Animação de carregamento
-        }}
-      />
-    </VictoryChart>
-  );
+  const timeStampPatient = selectedSensor.sensor === "HR"? mockData.map((item) => item.timestamp.split(' ')) : mockData.map((item) => item.datetime.split(' '))
+
+  const data = {
+    labels: timeStampPatient.map((time) => time[1]),
+    datasets: [
+      {
+        label: "HR (BPM)",
+        data: patientValues, // Valores do sensor no eixo Y , Y(x)
+        borderColor: "rgba(75,192,192,1)",
+        backgroundColor: "rgba(75,192,192,0.2)",
+        pointRadius: 2,
+        tension: 0.4, // Suaviza a linha
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: "Heart Rate Over Time",
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: "Time (HH:mm:ss)",
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: "Heart Rate (BPM)",
+        },
+        min: 50, // Limite inferior
+        max: 140, // Ajustar com base nos dados reais
+      },
+    },
+  };
+
+  return <Line data={data} options={options} />;
 };
 
 export default LineGraph;

@@ -13,11 +13,12 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
-    "@mui/x-charts": "^7.22.3",
+    "@mui/x-charts": "^7.23.0",
+    "chart.js": "^4.4.7",
     "next": "15.0.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "victory": "^37.3.2"
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "^20",
