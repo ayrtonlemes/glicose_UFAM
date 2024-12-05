@@ -1,15 +1,20 @@
+export interface PatientInfoProps {
+    id_patient: number,
+    name: string,
+    age: number | string,
+    gender: string,
+}
+
+export interface SensorsInfoProps {
+    
+}
+
 export interface MedicalValuesProps {
     heartRate: string,
     bloodPressure: string,
     oxygenSaturation: string,
 }
 
-export interface PatientInfoProps {
-    id_patient: number,
-    name: string,
-    age: number,
-    gender: string,
-}
 
 export interface HeartValueProps {
     id: number,

@@ -2,13 +2,14 @@
 import React, { useEffect, useState } from "react";
 
 import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import { getPatientById, PatientData } from "../../services/getPatientById";
+import { getPatientById} from "../../services/getPatientById";
 import { usePathname } from "next/navigation";
 import CaloriesGraphBar from "@/app/components/CaloriesGraph";
 import LineGraph from "@/app/components/LineGraph";
+import { PatientInfoProps } from "@/app/types/patient";
 
 const PatientDetails = () => {
-  const [patientData, setPatientData] = useState<PatientData | null>(null);
+  const [patientData, setPatientData] = useState<PatientInfoProps | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
@@ -52,13 +53,13 @@ const PatientDetails = () => {
         Detalhes do Paciente
       </Typography>
 
-      {patientData && patientData.patient && (
+      {patientData && (
         <Box marginBottom={4}>
           <Typography variant="h6">Informações do Paciente:</Typography>
-          <Typography>ID: {patientData.patient.id_patient}</Typography>
-          <Typography>Nome: {patientData.patient.name}</Typography>
-          <Typography>Idade: {patientData.patient.age}</Typography>
-          <Typography>Gênero: {patientData.patient.gender}</Typography>
+          <Typography>ID: {patientData.id_patient}</Typography>
+          <Typography>Nome: {patientData.name}</Typography>
+          <Typography>Idade: {patientData.age}</Typography>
+          <Typography>Gênero: {patientData.gender}</Typography>
         </Box>
       )}
 
@@ -81,7 +82,7 @@ const PatientDetails = () => {
             </Select>
           </FormControl>
         </Box>
-          <LineGraph sensor={selectedSensor}></LineGraph>
+          <LineGraph selectedSensor={selectedSensor ? selectedSensor : ""} selectedPatient={id!}></LineGraph>
       </TableContainer>
 
       <TableContainer component={Paper} style={{ marginBottom: "2rem" }}>
@@ -93,6 +94,7 @@ const PatientDetails = () => {
         
       </CaloriesGraphBar>
       </TableContainer>
+      {/*
       <TableContainer component={Paper}>
         <Typography variant="h6" gutterBottom>
           Dados dos Sensores
@@ -108,6 +110,7 @@ const PatientDetails = () => {
               <TableCell>Frequência Cardíaca</TableCell>
             </TableRow>
           </TableHead>
+          
           <TableBody>
             {patientData?.sensors.map((sensor, index) => (
               <TableRow key={index}>
@@ -122,6 +125,7 @@ const PatientDetails = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      * */}
     </Box>
   );
 };

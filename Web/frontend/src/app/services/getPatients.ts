@@ -1,28 +1,24 @@
-import { MedicalValuesProps, PatientInfoProps } from "../types/patient";
+import { PatientInfoProps } from "../types/patient";
 
-export interface PatientProps {
-  id: number;
-  name: string;
-  age: number;
-  gender: string;
-  metrics: MedicalValuesProps[];
-}
 
-export const getAllPatients = async (): Promise<PatientProps[]> => {
+export const getAllPatients = async (): Promise<PatientInfoProps[]> => {
   try {
-    const response = await fetch("http://localhost:5000/patients");
+    const response = await fetch("http://localhost:80/get_patient_list.php");
     if (!response.ok) {
       throw new Error("Erro ao fetch de todos os pacientes.");
     }
 
     const data = await response.json();
 
-    const patients: PatientProps[] = data.patient.map((patient: any) => ({
-      id: patient.id_patient,
-      name: patient.name,
-      age: patient.age,
+    if (!Array.isArray(data)) {
+      throw new Error("Formato de dados inesperado.");
+    }
+
+    const patients: PatientInfoProps[] = data.map((patient: PatientInfoProps) => ({
+      id_patient: patient.id_patient,
+      name: patient.name ? patient.name : `Patient 0${patient.id_patient}`,
+      age: patient.age ? patient.age : "N/A",
       gender: patient.gender,
-      metrics: mapMetricsForPatient(patient.id_patient, data),
     }));
 
     return patients;
@@ -32,17 +28,4 @@ export const getAllPatients = async (): Promise<PatientProps[]> => {
   }
 };
 
-const mapMetricsForPatient = (patientId: number, data: any): MedicalValuesProps[] => {
-  const patientData = data.patient_data.filter(
-    (entry: any) => entry.id_patient === patientId
-  );
-  const sensorsData = data.sensors.filter(
-    (entry: any) => entry.id_patient === patientId
-  );
 
-  return patientData.map((entry: any, index: number) => ({
-    heartRate: sensorsData[index]?.HR || "N/A",
-    bloodPressure: "N/A", // Placeholder (adicionar caso aplicável)
-    oxygenSaturation: "N/A", // Placeholder (adicionar caso aplicável)
-  }));
-};
