@@ -8,6 +8,12 @@ import CaloriesGraphBar from "@/app/components/CaloriesGraph";
 import LineGraph from "@/app/components/LineGraph";
 import { PatientInfoProps } from "@/app/types/patient";
 
+interface PatientDataProps {
+  id: number;
+  name: string;
+  age: number | string;
+  gender: string
+}
 const PatientDetails = () => {
   const [patientData, setPatientData] = useState<PatientInfoProps | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,6 +35,7 @@ const PatientDetails = () => {
             const data = await getPatientById(id);
             console.log(data)
             setPatientData(data);
+            console.log(patientData)
         }
         else {
             setError("PacienteNaoEncontrado")
@@ -44,6 +51,11 @@ const PatientDetails = () => {
     fetchPatientData();
   }, [id]);
 
+  useEffect(() => {
+    if (patientData) {
+      console.log("Dados atualizados do paciente:", patientData);
+    }
+  }, [patientData]);
   if (loading) return <Typography>Carregando dados...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
@@ -63,7 +75,14 @@ const PatientDetails = () => {
         </Box>
       )}
 
-      <TableContainer component={Paper} style={{ marginBottom: "2rem" }}>
+    <Box
+      display="flex"
+      flexDirection={{ xs: 'column', md: 'row' }}
+      gap={2}
+      justifyContent="space-between"
+      alignItems="stretch"
+    >
+      <Box flex={1} component={Paper} padding="2px">
         <Typography variant="h6" gutterBottom>
           Dados de sensores cardíacos
         </Typography>
@@ -83,50 +102,24 @@ const PatientDetails = () => {
           </FormControl>
         </Box>
           <LineGraph selectedSensor={selectedSensor ? selectedSensor : ""} selectedPatient={id!}></LineGraph>
-      </TableContainer>
+      </Box>
 
-      <TableContainer component={Paper} style={{ marginBottom: "2rem" }}>
+      <Box flex={1} component={Paper} padding="2px">
+
         <Typography variant="h6" gutterBottom>
           Registro Alimentar
         </Typography>
-
-      <CaloriesGraphBar>
-        
-      </CaloriesGraphBar>
-      </TableContainer>
-      {/*
-      <TableContainer component={Paper}>
-        <Typography variant="h6" gutterBottom>
-          Dados dos Sensores
-        </Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Data</TableCell>
-              <TableCell>Hora</TableCell>
-              <TableCell>EDA</TableCell>
-              <TableCell>Glicose</TableCell>
-              <TableCell>Temperatura da Pele</TableCell>
-              <TableCell>Frequência Cardíaca</TableCell>
-            </TableRow>
-          </TableHead>
+        <Box sx={{padding:"2px"}}>
+        <CaloriesGraphBar>
           
-          <TableBody>
-            {patientData?.sensors.map((sensor, index) => (
-              <TableRow key={index}>
-                <TableCell>{sensor.date.join(", ")}</TableCell>
-                <TableCell>{sensor.time.join(", ")}</TableCell>
-                <TableCell>{sensor.eda.join(", ")}</TableCell>
-                <TableCell>{sensor.glicose_dex.join(", ")}</TableCell>
-                <TableCell>{sensor.skin_Temperature.join(", ")}</TableCell>
-                <TableCell>{sensor.HR.join(", ")}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      * */}
+        </CaloriesGraphBar>
+
+        </Box>
+      
+
+      </Box>
     </Box>
+  </Box>
   );
 };
 
