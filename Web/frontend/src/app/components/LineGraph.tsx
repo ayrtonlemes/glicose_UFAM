@@ -42,7 +42,7 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
     getPatientSensors(selectedPatient)
       .then((data) => {
         setSensorsData(data);
-        // Extrair datas únicas após os dados serem carregados
+  
         const dates = Array.from(new Set(data.map((item) => item.registro_date)));
         setUniqueDates(dates);
       })
@@ -70,7 +70,6 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
   let sensorValues: any[] = [];
   let labels: any[] = [];
 
-  // Verificação do sensor selecionado
   if (selectedSensor.typeSensor === "HR") {
     sensorValues = filteredData.map((item) => item.ibi); // Ajuste conforme o campo correto de HR
     labels = filteredData.map((item) => item.registro_time);
@@ -80,18 +79,23 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
   } else if (selectedSensor.typeSensor === "BVP") {
     sensorValues = filteredData.map((item) => item.bvp); // Acessa os dados de BVP
     labels = filteredData.map((item) => item.registro_time);
+  } else if(selectedSensor.typeSensor === "EDA") {
+    sensorValues = filteredData.map((item) => item.eda);
+    labels = filteredData.map((item) => item.registro_time);
   }
 
   const data = {
     labels: labels,
     datasets: [
       {
-        label:
+        label: //da pra colocar esse texto padrao no sensorValues
           selectedSensor.typeSensor === "HR"
             ? "HR (BPM)" //tambem fazer para unidades
             : selectedSensor.typeSensor === "IBI"
             ? "IBI"
-            : "BVP (hg_mm)",
+            : selectedSensor.typeSensor === "EDA" 
+            ? "EDA(mS)"
+            : "BVP (hg_mm)", 
         data: sensorValues,
         borderColor: "rgba(75,192,192,1)",
         backgroundColor: "rgba(75,192,192,0.2)",
@@ -114,6 +118,8 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
             ? "Heart Rate Over Time"
             : selectedSensor.typeSensor === "IBI"
             ? "Interval Between InnerBeats"
+            : selectedSensor.typeSensor === "EDA"
+            ? "ElectroDermal Activity"
             : "Blood Volume Pulse",
       },
     },
@@ -132,7 +138,9 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
               ? "Heart Rate (BPM)"
               : selectedSensor.typeSensor === "IBI"
               ? "IBI(s)"
-              : "Blood Volume Pulse (hg_mm)",
+              : selectedSensor.typeSensor === "EDA"
+              ? "ElectroDermal Activity(uS)"
+              :"Blood Volume Pulse (hg_mm)",
         },
         min: selectedSensor.min, // Ajuste conforme necessário
         max: selectedSensor.max, // Ajuste conforme necessário

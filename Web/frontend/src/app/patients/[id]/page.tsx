@@ -22,6 +22,7 @@ const PatientDetails = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
+  
   const allSensors = sensorConfigs;
   
   const pathname = usePathname();
@@ -113,7 +114,7 @@ const PatientDetails = () => {
           <LineGraph 
           selectedSensor={sensorConfigs[selectedSensor]} 
           selectedPatient={id!}>
-            
+
           </LineGraph>
         )}
       </Box>
