@@ -11,7 +11,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { getPatientSensors } from "../services/getPatientSensors";
-import { SensorsProps } from "../types/sensors";
+import { SensorsProps, TypeSensorsProps } from "../types/sensors";
 import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 ChartJS.register(
@@ -25,7 +25,7 @@ ChartJS.register(
 );
 
 interface SelectedSensorProps {
-  selectedSensor: string | undefined;
+  selectedSensor: TypeSensorsProps;
   selectedPatient: string;
 }
 
@@ -71,13 +71,13 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
   let labels: any[] = [];
 
   // Verificação do sensor selecionado
-  if (selectedSensor === "HR") {
+  if (selectedSensor.typeSensor === "HR") {
     sensorValues = filteredData.map((item) => item.ibi); // Ajuste conforme o campo correto de HR
     labels = filteredData.map((item) => item.registro_time);
-  } else if (selectedSensor === "IBI") {
+  } else if (selectedSensor.typeSensor === "IBI") {
     sensorValues = filteredData.map((item) => item.ibi); // Acessa os dados de IBI
     labels = filteredData.map((item) => item.registro_time);
-  } else if (selectedSensor === "BVP") {
+  } else if (selectedSensor.typeSensor === "BVP") {
     sensorValues = filteredData.map((item) => item.bvp); // Acessa os dados de BVP
     labels = filteredData.map((item) => item.registro_time);
   }
@@ -87,9 +87,9 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
     datasets: [
       {
         label:
-          selectedSensor === "HR"
-            ? "HR (BPM)"
-            : selectedSensor === "IBI"
+          selectedSensor.typeSensor === "HR"
+            ? "HR (BPM)" //tambem fazer para unidades
+            : selectedSensor.typeSensor === "IBI"
             ? "IBI"
             : "BVP (hg_mm)",
         data: sensorValues,
@@ -110,9 +110,9 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
       title: {
         display: true,
         text:
-          selectedSensor === "HR"
+          selectedSensor.typeSensor === "HR"
             ? "Heart Rate Over Time"
-            : selectedSensor === "IBI"
+            : selectedSensor.typeSensor === "IBI"
             ? "Interval Between InnerBeats"
             : "Blood Volume Pulse",
       },
@@ -128,14 +128,14 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
         title: {
           display: true,
           text:
-            selectedSensor === "HR"
+            selectedSensor.typeSensor === "HR"
               ? "Heart Rate (BPM)"
-              : selectedSensor === "IBI"
+              : selectedSensor.typeSensor === "IBI"
               ? "IBI(s)"
               : "Blood Volume Pulse (hg_mm)",
         },
-        min: -0.5, // Ajuste conforme necessário
-        max: 0.5, // Ajuste conforme necessário
+        min: selectedSensor.min, // Ajuste conforme necessário
+        max: selectedSensor.max, // Ajuste conforme necessário
       },
     },
   };

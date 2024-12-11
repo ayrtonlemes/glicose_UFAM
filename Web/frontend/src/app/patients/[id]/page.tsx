@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import CaloriesGraphBar from "@/app/components/CaloriesGraph";
 import LineGraph from "@/app/components/LineGraph";
 import { PatientInfoProps } from "@/app/types/patient";
+import { sensorConfigs } from "@/app/types/sensors";
 
 interface PatientDataProps {
   id: number;
@@ -14,12 +15,15 @@ interface PatientDataProps {
   age: number | string;
   gender: string
 }
+
+
 const PatientDetails = () => {
   const [patientData, setPatientData] = useState<PatientInfoProps | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
-
+  const allSensors = sensorConfigs;
+  
   const pathname = usePathname();
 
   const handleSensorChange = (event: SelectChangeEvent) => {
@@ -95,13 +99,23 @@ const PatientDetails = () => {
               onChange={handleSensorChange}
               label="Escolha um sensor"
             >
-              <MenuItem value="IBI">IBI</MenuItem>
-              <MenuItem value="HR">HR</MenuItem>
-              <MenuItem value="BVP">BVP</MenuItem>
+            {Object.keys(allSensors).map((key) => (
+              <MenuItem key={key} value={key}>
+                {allSensors[key].typeSensor}
+              </MenuItem>
+            ))}
             </Select>
           </FormControl>
         </Box>
-          <LineGraph selectedSensor={selectedSensor ? selectedSensor : ""} selectedPatient={id!}></LineGraph>
+
+        {selectedSensor && (
+
+          <LineGraph 
+          selectedSensor={sensorConfigs[selectedSensor]} 
+          selectedPatient={id!}>
+            
+          </LineGraph>
+        )}
       </Box>
 
       <Box flex={1} component={Paper} padding="2px">
