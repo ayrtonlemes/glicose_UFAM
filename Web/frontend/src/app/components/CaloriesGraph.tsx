@@ -50,7 +50,7 @@ export default function CaloriesGraphBar() {
     }));
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '90%' }}>
     <Typography id="series-selection" gutterBottom>
       Selecione as variáveis
     </Typography>
@@ -69,7 +69,7 @@ export default function CaloriesGraphBar() {
       ))}
     </FormGroup>
       <BarChart
-        height={300}
+        height={200}
         series={filteredSeries}
         skipAnimation={skipAnimation}
       />

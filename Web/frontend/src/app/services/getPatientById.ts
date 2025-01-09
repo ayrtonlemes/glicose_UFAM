@@ -15,7 +15,7 @@ export const getPatientById = async (id: string) => {
       const data = await response.json();
   
       const patient: PatientInfoProps = data.map((patient: PatientInfoProps) => ({
-        id: patient.id_patient,
+        id_patient: patient.id_patient,
         name: patient.name ? patient.name : `0${patient.id_patient}`,
         age: patient.age ? patient.age : "N/A",
         gender: patient.gender,

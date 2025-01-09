@@ -32,6 +32,7 @@ interface SelectedSensorProps {
 const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => {
   const pid = Number(selectedPatient);
   const [sensorsData, setSensorsData] = useState<SensorsProps[] | undefined>(undefined);
+  const [sensorsData2, setSensorsData2] = useState<[]>()
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [uniqueDates, setUniqueDates] = useState<string[]>([]);
@@ -149,7 +150,7 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
   };
 
   return (
-    <Box>
+    <Box sx={{width : '90%'}}>
       <FormControl fullWidth>
         <InputLabel>Selecione a Data</InputLabel>
         <Select

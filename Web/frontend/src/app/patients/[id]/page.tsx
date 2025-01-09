@@ -74,8 +74,6 @@ const PatientDetails = () => {
         <Box marginBottom={4}>
           <Typography variant="h6">Informações do Paciente:</Typography>
           <Typography>ID: {patientData.id_patient}</Typography>
-          <Typography>Nome: {patientData.name}</Typography>
-          <Typography>Idade: {patientData.age}</Typography>
           <Typography>Gênero: {patientData.gender}</Typography>
         </Box>
       )}
