@@ -9,10 +9,11 @@ import LineGraph from "@/app/components/LineGraph";
 import { PatientInfoProps } from "@/app/types/patient";
 import { sensorConfigs } from "@/app/types/sensors";
 import PredictBox from "./components/PredictBox";
+import { getAllPatients } from "./services/getPatients";
 
 
 interface PatientDataProps {
-  id: number;
+  id_patient: number;
   name: string;
   age: number | string;
   gender: string
@@ -20,10 +21,12 @@ interface PatientDataProps {
 
 export default function Home() {
   
-  const [patientData, setPatientData] = useState<PatientInfoProps | null>(null);
+  const [patientData, setPatientData] = useState<PatientDataProps | null>(null);
+  const [patients, setPatients] = useState<PatientDataProps[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
+  const [selectedPatient, setSelectedPatient] = useState<string | undefined>('');
   
   const allSensors = sensorConfigs;
   
@@ -33,20 +36,20 @@ export default function Home() {
     setSelectedSensor(event.target.value as string);
   }
 
+  const handlePatientChange = (event: SelectChangeEvent) => {
+    setSelectedPatient(event.target.value as string);
+  }
   const id = pathname ? pathname.split("/").filter(Boolean).pop() : null;
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
         setLoading(true);
-        if(id) {
-            const data = await getPatientById(id);
-            console.log(data)
-            setPatientData(data);
-            console.log(patientData)
-        }
-        else {
+            const data = await getAllPatients();
+            console.log("DATA",data)
+            setPatients(data);
+            console.log("PATIENTS:", patients);
+            console.log("PD", patientData)
             //setError("PacienteNaoEncontrado")
-        }
       } catch (err) {
         setError("Erro ao carregar dados do paciente.");
         console.error(err);
@@ -62,7 +65,25 @@ export default function Home() {
     if (patientData) {
       console.log("Dados atualizados do paciente:", patientData);
     }
-  }, [patientData]);
+  }, [patientData, selectedPatient]);
+
+  useEffect(() => {
+    if (patients && selectedPatient) {
+      const patient = patients.find(p => p.name === selectedPatient);
+      console.log("Paciente : ", patient);
+      console.log("SelectedPati: ", selectedPatient)
+      setPatientData(patient || null); 
+    }
+    
+  }, [selectedPatient, patients]);
+
+
+  useEffect(() => {
+    if (patients) {
+      console.log("Updated patients data:", patients);
+    }
+  }, [patients]); // Esse useEffect será chamado sempre que 'patients' mud
+
   if (loading) return <Typography>Carregando dados...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
   
@@ -74,14 +95,18 @@ export default function Home() {
         <Select
           labelId="patient-selector-label"
           aria-placeholder="Selecione um paciente"
+          value = {selectedPatient ?? "notSelected"}
+          onChange={handlePatientChange}
         >
-
+        {patients ? patients.map((patient) => (
+              <MenuItem key={patient.id_patient} value={patient.name}>
+                {patient.name}
+              </MenuItem>
+            )) : "Não há pacientes cadastrados."}
         </Select>
       </FormControl>
 
-
-
-      {patientData && (
+      {patientData &&(
         <Box marginBottom={4}>
           <Typography variant="h6">Informações do Paciente:</Typography>
           <Typography>ID: {patientData.id_patient}</Typography>
@@ -123,7 +148,6 @@ export default function Home() {
           <LineGraph 
           selectedSensor={sensorConfigs[selectedSensor]} 
           selectedPatient={id!}>
-
           </LineGraph>
         )}
       </Box>
@@ -143,7 +167,7 @@ export default function Home() {
 
       </Box>
     </Box>
-    <Box>
+    <Box flex={1} component={Paper} margin="2px" padding="4px">
     <PredictBox>
       
     </PredictBox>
