@@ -51,9 +51,6 @@ export default function CaloriesGraphBar() {
 
   return (
     <Box sx={{ width: '90%' }}>
-    <Typography id="series-selection" gutterBottom>
-      Selecione as variáveis
-    </Typography>
     <FormGroup>
       {patientFoodLog.map((s) => (
         <FormControlLabel
@@ -69,7 +66,7 @@ export default function CaloriesGraphBar() {
       ))}
     </FormGroup>
       <BarChart
-        height={200}
+        height={180}
         series={filteredSeries}
         skipAnimation={skipAnimation}
       />

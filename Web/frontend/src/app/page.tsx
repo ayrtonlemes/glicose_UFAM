@@ -1,65 +1,154 @@
 'use client'
 
-import { useEffect, useState } from "react";
-import PatientMetrics from "./components/PatientMetrics";
-import { getAllPatients, PatientProps } from "./services/getPatients";
-import PatientInfo from "./components/PatientInfo";
-import { Box, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { usePathname } from "next/navigation";
+import CaloriesGraphBar from "@/app/components/CaloriesGraph";
+import LineGraph from "@/app/components/LineGraph";
+import { PatientInfoProps } from "@/app/types/patient";
+import { sensorConfigs } from "@/app/types/sensors";
+import PredictBox from "./components/PredictBox";
+
+
+interface PatientDataProps {
+  id: number;
+  name: string;
+  age: number | string;
+  gender: string
+}
 
 export default function Home() {
-  const [patients, setPatients] = useState<PatientProps[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<PatientProps | null>(null);
+  
+  const [patientData, setPatientData] = useState<PatientInfoProps | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
+  
+  const allSensors = sensorConfigs;
+  
+  const pathname = usePathname();
 
-  const handleSelectPatient = (event: SelectChangeEvent<Number>) => {
-    const patientId = event.target.value;
-    const patient = patients.find((p) => p.id === patientId) || null;
-    setSelectedPatient(patient);
-  };
+  const handleSensorChange = (event: SelectChangeEvent) => {
+    setSelectedSensor(event.target.value as string);
+  }
 
+  const id = pathname ? pathname.split("/").filter(Boolean).pop() : null;
   useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchPatientData = async () => {
       try {
-        const patientsData = await getAllPatients();
-        console.log(patientsData)
-        setPatients(patientsData); 
-      } catch (error) {
-        console.log("Erro ao carregar os dados dos pacientes.");
+        setLoading(true);
+        if(id) {
+            const data = await getPatientById(id);
+            console.log(data)
+            setPatientData(data);
+            console.log(patientData)
+        }
+        else {
+            //setError("PacienteNaoEncontrado")
+        }
+      } catch (err) {
+        setError("Erro ao carregar dados do paciente.");
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchPatients();
-  }, []);
 
+    fetchPatientData();
+  }, [id]);
+
+  useEffect(() => {
+    if (patientData) {
+      console.log("Dados atualizados do paciente:", patientData);
+    }
+  }, [patientData]);
+  if (loading) return <Typography>Carregando dados...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
+  
   return (
-    <Box sx={{ padding: '20px', width: "50%" }}>
-      <Typography variant="h4">Patient Dashboard</Typography>
+    <Box padding={3}>
 
-      <FormControl sx={{mt: 2, minWidth: "20%"}}>
-        <InputLabel id="patient_selector_label" sx={{minWidth: 300, fontSize:"25px"}}>Selecione um Paciente</InputLabel>
-        <Select 
-          labelId="patient_selector_label"
-          id="patient_selector"
-          value={selectedPatient? selectedPatient.id : ""} 
-          onChange={handleSelectPatient}
-          label="Selecione.."
-          
+      <FormControl sx ={{m: 1, minWidth: 300}}>
+        <InputLabel id="patient-selector-label">Selecione um paciente</InputLabel>
+        <Select
+          labelId="patient-selector-label"
+          aria-placeholder="Selecione um paciente"
         >
-          <MenuItem value="">
-            <em>Selecione agora</em>
-          </MenuItem>
-            {patients.map((p) => (
-              <MenuItem key={p.id} value = {p.id}>
-                {p.name}
-              </MenuItem>
-            ))}   
+
         </Select>
       </FormControl>
-      
-      {selectedPatient && (
-        <>
-          <PatientInfo selectedPatient={selectedPatient} />
-          <PatientMetrics selectedPatient={selectedPatient} />
-        </>
+
+
+
+      {patientData && (
+        <Box marginBottom={4}>
+          <Typography variant="h6">Informações do Paciente:</Typography>
+          <Typography>ID: {patientData.id_patient}</Typography>
+          <Typography>Gênero: {patientData.gender}</Typography>
+        </Box>
       )}
+
+    <Box
+      display="flex"
+      flexDirection={{ xs: 'column', md: 'row' }}
+      gap={2}
+      justifyContent="space-between"
+      alignItems="stretch"
+    >
+      <Box flex={1} component={Paper} padding="2px">
+        <Typography variant="h6" gutterBottom>
+          Dados de sensores cardíacos
+        </Typography>
+        <Box>
+          <FormControl sx ={{m: 1, minWidth: 120}}>
+            <InputLabel id="sensor-select-label">Escolha o sensor</InputLabel>
+            <Select 
+              labelId="sensor-select-label"
+              value={selectedSensor}
+              onChange={handleSensorChange}
+              label="Escolha um sensor"
+            >
+            {Object.keys(allSensors).map((key) => (
+              <MenuItem key={key} value={key}>
+                {allSensors[key].typeSensor}
+              </MenuItem>
+            ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        {selectedSensor && (
+
+          <LineGraph 
+          selectedSensor={sensorConfigs[selectedSensor]} 
+          selectedPatient={id!}>
+
+          </LineGraph>
+        )}
+      </Box>
+
+      <Box flex={1} component={Paper} padding="2px">
+
+        <Typography variant="h6" gutterBottom>
+          Registro Alimentar
+        </Typography>
+        <Box sx={{padding:"2px"}}>
+        <CaloriesGraphBar>
+          
+        </CaloriesGraphBar>
+
+        </Box>
+      
+
+      </Box>
     </Box>
-  );
+    <Box>
+    <PredictBox>
+      
+    </PredictBox>
+    </Box>
+  </Box>
+  )
+    
 }
