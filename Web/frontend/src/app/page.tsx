@@ -147,16 +147,29 @@ export default function Home() {
         </Select>
       </FormControl>
 
-      {datetimeRange && (
-        <Box marginBottom={4}>
-          <Typography variant="h6">Datetimes:</Typography>
-          <ul>
-            {datetimeRange.map((date, index) => (
-              <li key={index}>{date}</li>
-            ))}
-          </ul>
-        </Box>
-      )}
+      {datetimeRange.length > 0 && (
+  <Box marginBottom={4}>
+    <Typography variant="h6">Selecione um horário:</Typography>
+    <Box display="flex" gap={2} overflow="auto">
+      {datetimeRange.map((date, index) => (
+        <button
+          key={index}
+          onClick={() => setSelectedDate(date)}
+          style={{
+            padding: "10px 15px",
+            borderRadius: "5px",
+            backgroundColor: selectedDate === date ? "#1976d2" : "#f0f0f0",
+            color: selectedDate === date ? "#fff" : "#000",
+            cursor: "pointer",
+          }}
+        >
+          {new Date(date).toLocaleString()} {/* Exibe no formato legível */}
+        </button>
+      ))}
+    </Box>
+  </Box>
+)}
+
 
     <Box display="flex" justifyContent="space-between">
         <button onClick={() => handleDatetimeChange('prev')}>Anterior</button>
