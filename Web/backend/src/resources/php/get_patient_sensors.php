@@ -11,10 +11,16 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // Verifica se o id foi passado via GET ou POST
 $id_patient = isset($_GET['id']) ? $_GET['id'] : null; // Usando GET, pode usar POST dependendo da sua implementação
+$sensor_type = isset($_GET['sensor']) ? $_GET['sensor'] : null; // Tipo de sensor
 
 // Verifica se o id_patient foi fornecido
 if ($id_patient === null) {
     echo json_encode(['error' => 'ID do paciente não fornecido.']);
+    exit;
+}
+
+if ($sensor_type === null) {
+    echo json_encode(['error' => 'Tipo de sensor não fornecido.']);
     exit;
 }
 
@@ -26,8 +32,38 @@ if ($conn->connect_error) {
     die("Falha na conexão: " . $conn->connect_error);
 }
 
+// Definir a tabela de acordo com o tipo de sensor
+switch ($sensor_type) {
+    case 'acc':
+        $table = 'acc_data';
+        break;
+    case 'bvp':
+        $table = 'bvp_data';
+        break;
+    case 'eda':
+        $table = 'eda_data';
+        break;
+    case 'glicodex':
+        $table = 'glicodex_data';
+        break;
+    case 'hr':
+        $table='hr_data';
+        break;
+    case 'ibi':
+        $table='ibi_data';
+        break;
+    case 'temp':
+        $table='temp_data';
+        break;
+
+    default:
+        echo json_encode(['error' => 'Tipo de sensor inválido.']);
+        exit;
+}
+
+
 // Prepara a consulta SQL com o id do paciente
-$sql = "SELECT * FROM sensors_data WHERE id_patient = ?";
+$sql = "SELECT * FROM $table WHERE id_patient = ?";
 $stmt = $conn->prepare($sql);
 
 // Verifica se a preparação da consulta foi bem-sucedida
