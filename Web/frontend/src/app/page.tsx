@@ -10,6 +10,7 @@ import { PatientInfoProps } from "@/app/types/patient";
 import { sensorConfigs } from "@/app/types/sensors";
 import PredictBox from "./components/PredictBox";
 import { getAllPatients } from "./services/getPatients";
+import { getDatetime } from "./services/getDatetime";
 
 
 interface PatientDataProps {
@@ -27,7 +28,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
   const [selectedPatient, setSelectedPatient] = useState<string | undefined>('');
-  
+  const [selectedDate, setSelectedDate] = useState<string | undefined>('');
+  const [datetimeRange, setDatetimeRange] = useState<string[]>([]);
+  const [minNav, setMinNav] = useState<number>(0);
+  const [maxNav, setMaxNav] = useState<number>(20);
   const allSensors = sensorConfigs;
   
   const pathname = usePathname();
@@ -39,11 +43,43 @@ export default function Home() {
   const handlePatientChange = (event: SelectChangeEvent) => {
     setSelectedPatient(event.target.value as string);
   }
+
+  const fetchDatetimeRange = async (id_patient: number, min: number, max: number) => {
+      try {
+        setLoading(true);
+        if(patientData) {
+          const data = await getDatetime(patientData?.id_patient, minNav, maxNav);
+          const formattedDates = data.map((item: { datetime: string }) => item.datetime);
+          setDatetimeRange(formattedDates);
+          console.log("RANGE DATETIME: ",formattedDates);
+        }
+      }catch(err) {
+        setError("Erro ao carregar datetimes do paciente");
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+  const handleDatetimeChange = (direction: 'next' | 'prev') => {
+    const step = 20
+    if(minNav >=0) {
+      if(direction === 'next') {
+        setMinNav((prev) => prev + step);
+        setMaxNav((prev) => prev + step);
+      } else {
+        setMinNav(minNav - 20);
+        setMaxNav(maxNav - 20);
+      }
+    } 
+    }
+
   const id = pathname ? pathname.split("/").filter(Boolean).pop() : null;
   useEffect(() => {
     const fetchPatientData = async () => {
       try {
         setLoading(true);
+        setError(null);
             const data = await getAllPatients();
             console.log("DATA",data)
             setPatients(data);
@@ -59,7 +95,9 @@ export default function Home() {
     };
 
     fetchPatientData();
-  }, [id]);
+  },[]);
+
+
 
   useEffect(() => {
     if (patientData) {
@@ -72,17 +110,20 @@ export default function Home() {
       const patient = patients.find(p => p.name === selectedPatient);
       console.log("Paciente : ", patient);
       console.log("SelectedPati: ", selectedPatient)
-      setPatientData(patient || null); 
+      if(patient) {
+        setPatientData(patient); 
+        fetchDatetimeRange(patient.id_patient, minNav, maxNav)
+      }
     }
     
-  }, [selectedPatient, patients]);
+  }, [selectedPatient, patients, minNav, maxNav]);
 
 
   useEffect(() => {
     if (patients) {
       console.log("Updated patients data:", patients);
     }
-  }, [patients]); // Esse useEffect será chamado sempre que 'patients' mud
+  }, [patients]); // Esse useEffect será chamado sempre que 'patients' mudar
 
   if (loading) return <Typography>Carregando dados...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
@@ -106,14 +147,22 @@ export default function Home() {
         </Select>
       </FormControl>
 
-      {patientData &&(
+      {datetimeRange && (
         <Box marginBottom={4}>
-          <Typography variant="h6">Informações do Paciente:</Typography>
-          <Typography>ID: {patientData.id_patient}</Typography>
-          <Typography>Gênero: {patientData.gender}</Typography>
+          <Typography variant="h6">Datetimes:</Typography>
+          <ul>
+            {datetimeRange.map((date, index) => (
+              <li key={index}>{date}</li>
+            ))}
+          </ul>
         </Box>
       )}
 
+    <Box display="flex" justifyContent="space-between">
+        <button onClick={() => handleDatetimeChange('prev')}>Anterior</button>
+        <button onClick={() => handleDatetimeChange('next')}>Próximo</button>
+    </Box>
+    
     <Box
       display="flex"
       flexDirection={{ xs: 'column', md: 'row' }}
@@ -141,7 +190,10 @@ export default function Home() {
             ))}
             </Select>
           </FormControl>
+          
+          <Typography>Datetime:</Typography> {/** para pegar o intervalo padrão dos sensores que existem lá.*/}
         </Box>
+
 
         {selectedSensor && (
 
@@ -169,7 +221,6 @@ export default function Home() {
     </Box>
     <Box flex={1} component={Paper} margin="2px" padding="4px">
     <PredictBox>
-      
     </PredictBox>
     </Box>
   </Box>

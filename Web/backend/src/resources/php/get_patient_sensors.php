@@ -12,6 +12,10 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 // Verifica se o id foi passado via GET ou POST
 $id_patient = isset($_GET['id']) ? $_GET['id'] : null; // Usando GET, pode usar POST dependendo da sua implementação
 $sensor_type = isset($_GET['sensor']) ? $_GET['sensor'] : null; // Tipo de sensor
+$datetime_selected = isset($_GET['datetime']) ? $_GET['datetime'] : null; // DateTime selecionado
+$interval_minutes = 5; // Intervalo fixo de 5 minutos
+
+
 
 // Verifica se o id_patient foi fornecido
 if ($id_patient === null) {

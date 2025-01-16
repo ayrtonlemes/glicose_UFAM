@@ -105,6 +105,8 @@ const PatientDetails = () => {
             ))}
             </Select>
           </FormControl>
+
+          <Typography> Dia</Typography>
         </Box>
 
         {selectedSensor && (
