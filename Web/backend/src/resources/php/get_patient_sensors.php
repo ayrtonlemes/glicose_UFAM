@@ -28,6 +28,11 @@ if ($sensor_type === null) {
     exit;
 }
 
+if ($datetime_selected === null) {
+    echo json_encode(['error' => 'Data e hora não fornecidos.']);
+    exit;
+}
+
 // Cria a conexão com o MySQL
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -65,9 +70,13 @@ switch ($sensor_type) {
         exit;
 }
 
+//Tratamento dos 5 minutos
+$datetime_obj = new Datetime($datetime_selected);
+$datetime_obj->modify('-5 minutes'); // Subtrai 5 minutos
+$datetime_before = $datetime_obj->format('Y-m-d H:i:s');
 
 // Prepara a consulta SQL com o id do paciente
-$sql = "SELECT * FROM $table WHERE id_patient = ?";
+$sql = "SELECT * FROM $table WHERE id_patient = ? AND datetime BETWEEN ? AND ?";
 $stmt = $conn->prepare($sql);
 
 // Verifica se a preparação da consulta foi bem-sucedida
@@ -77,7 +86,7 @@ if ($stmt === false) {
 }
 
 // Vincula o parâmetro id_patient à consulta
-$stmt->bind_param("i", $id_patient); // "i" indica que é um inteiro
+$stmt->bind_param("iss", $id_patient, $datetime_before, $datetime_selected); // "i" indica que é um inteiro
 
 // Executa a consulta
 $stmt->execute();
