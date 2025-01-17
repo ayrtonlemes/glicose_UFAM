@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Typography, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Paper } from "@mui/material";
+import { Box, Typography, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Paper, Backdrop, CircularProgress } from "@mui/material";
 import { sensorConfigs } from "@/app/types/sensors";
 import { getAllPatients } from "./services/getPatients";
 import { getDatetime } from "./services/getDatetime";
 import LineGraph from "@/app/components/LineGraph";
 import CaloriesGraphBar from "@/app/components/CaloriesGraph";
 import PredictBox from "./components/PredictBox";
+import { getPatientSensors } from "./services/getPatientSensors";
 
 interface PatientDataProps {
   id_patient: number;
@@ -27,6 +28,7 @@ export default function Home() {
   const [datetimeRange, setDatetimeRange] = useState<string[]>([]);
   const [minNav, setMinNav] = useState<number>(0);
   const [maxNav, setMaxNav] = useState<number>(20);
+  const [sensorData, setSensorData] = useState<number[]>([]);
   const allSensors = sensorConfigs;
 
   const fetchPatients = useCallback(async () => {
@@ -41,6 +43,7 @@ export default function Home() {
       setLoading(false);
     }
   }, []);
+
 
   const fetchDatetimeRange = useCallback(async (id_patient: number, min: number, limit: number) => {
     try {
@@ -60,6 +63,22 @@ export default function Home() {
       setLoading(false);
     }
   }, []);
+
+  const fetchSensorsData = useCallback(async (id_patient: number, selectedSensor: string, dateTime: string) => {
+    try {
+      setLoading(true);
+      const data = await getPatientSensors(id_patient, selectedSensor, dateTime)
+      console.log(data);
+      if(data && data.length > 0) {
+        setSensorData(data);
+      }
+    }catch(err) {
+      setError("Erro ao obter dados do sensor do paciente");
+      console.log(err);
+    }finally {
+      setLoading(false);
+    }
+  }, [])
 
   const handleDatetimeChange = (direction: 'next' | 'prev') => {
     const step = 20;
@@ -83,10 +102,20 @@ export default function Home() {
     fetchPatients();
   }, [fetchPatients]);
 
-  if (loading) return <Typography>Carregando dados...</Typography>;
+  useEffect(() => {
+    if(selectedPatient && selectedSensor && selectedDate) {
+      const patient = patients?.find(p => p.name === selectedPatient);
+      if(patient) {
+        fetchSensorsData(patient.id_patient, selectedSensor, selectedDate);
+      }
+    }
+  }, [selectedPatient, selectedSensor, selectedDate, fetchSensorsData]);
+  //if (loading) return <Typography>Carregando dados...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
+
+
     <Box padding={3}>
       <FormControl sx={{ m: 1, minWidth: 300 }}>
         <InputLabel id="patient-selector-label">Selecione um paciente</InputLabel>
@@ -171,7 +200,7 @@ export default function Home() {
           {selectedSensor && patientData && (
             <LineGraph
               selectedSensor={sensorConfigs[selectedSensor]}
-              selectedPatient={patientData.id_patient}
+              data={sensorData}
             />
           )}
         </Box>
@@ -187,6 +216,15 @@ export default function Home() {
       <Box flex={1} component={Paper} margin="2px" padding="4px">
         <PredictBox />
       </Box>
+      <Backdrop
+        sx={{
+          color: '#fff',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={loading} // Exibe o Backdrop quando 'loading' for true
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   );
 }
