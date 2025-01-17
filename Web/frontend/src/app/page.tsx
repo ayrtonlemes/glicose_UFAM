@@ -213,7 +213,7 @@ export default function Home() {
         </Box>
       </Box>
 
-      <Box flex={1} component={Paper} margin="2px" padding="4px">
+      <Box flex={1} component={Paper} margin="2px" padding="4px" sx={{textAlign: 'left'}}>
         <PredictBox />
       </Box>
       <Backdrop

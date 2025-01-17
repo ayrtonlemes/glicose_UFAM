@@ -1,27 +1,57 @@
 import React from 'react';
-import { Box, Typography, Container } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 export default function PredictBox() {
   return (
-    <Container>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Box sx={{ flex: 1, paddingRight: 2 }}>
+    <Box sx={{ padding: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        {/* Seção da esquerda */}
+        <Box
+          sx={{
+            flex: 1,
+            paddingRight: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start', // Alinha os textos à esquerda
+            textAlign: 'left',        // Garante alinhamento de texto
+          }}
+        >
           <Typography>
-            Aqui será a box falando dos dados do modelo.
+            Hipoglicemia: Menor que 70 mg/dL.
+          </Typography>
+          <Typography>
+            Normal: Entre 70 mg/dL e 99 mg/dL.
+          </Typography>
+          <Typography>
+            Pré-diabetes: Entre 100 mg/dL e 125 mg/dL (também chamado de glicemia de jejum alterada).
+          </Typography>
+          <Typography>
+            Diabetes: Igual ou superior a 126 mg/dL em mais de uma medição.
           </Typography>
         </Box>
 
-        <Box sx={{ width: '1px', height: '50px', backgroundColor: 'gray' }} />
+        {/* Divisor cinza */}
+        <Box sx={{ width: '1px', height: '100%', backgroundColor: 'gray', marginX: 2 }} />
 
-        <Box sx={{ flex: 1, paddingLeft: 2 }}>
-          <Typography variant='h5'>
-            Resultado: 
+        {/* Seção da direita */}
+        <Box
+          sx={{
+            flex: 1,
+            paddingLeft: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start', // Alinha textos à esquerda
+            textAlign: 'left',        // Garante alinhamento de texto
+          }}
+        >
+          <Typography variant="h5" gutterBottom>
+            Resultado:
           </Typography>
           <Typography>
-            O nível de glicemia de  mg/dL foi classificado como:
+            O nível de glicemia de mg/dL foi classificado como:
           </Typography>
         </Box>
       </Box>
-    </Container>
+    </Box>
   );
 }
