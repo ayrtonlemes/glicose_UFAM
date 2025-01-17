@@ -15,8 +15,6 @@ $sensor_type = isset($_GET['sensor']) ? $_GET['sensor'] : null; // Tipo de senso
 $datetime_selected = isset($_GET['datetime']) ? $_GET['datetime'] : null; // DateTime selecionado
 $interval_minutes = 5; // Intervalo fixo de 5 minutos
 
-
-
 // Verifica se o id_patient foi fornecido
 if ($id_patient === null) {
     echo json_encode(['error' => 'ID do paciente não fornecido.']);
@@ -56,13 +54,13 @@ switch ($sensor_type) {
         $table = 'glicodex_data';
         break;
     case 'hr':
-        $table='hr_data';
+        $table = 'hr_data';
         break;
     case 'ibi':
-        $table='ibi_data';
+        $table = 'ibi_data';
         break;
     case 'temp':
-        $table='temp_data';
+        $table = 'temp_data';
         break;
 
     default:
@@ -94,16 +92,49 @@ $stmt->execute();
 // Obtemos os resultados
 $result = $stmt->get_result();
 
-// Cria um array para armazenar os dados
-$patient_sensors_data = array();
+// Cria um array para armazenar os dados do sensor
+$sensor_data = array();
 
 // Verifica se há resultados e os armazena no array
 while ($row = $result->fetch_assoc()) {
-    $patient_sensors_data[] = $row;
+    $sensor_value = null;
+
+    // Exemplo genérico: captura o valor do sensor de acordo com o tipo solicitado
+    switch ($sensor_type) {
+        case 'acc':
+            $sensor_value = $row['acc']; // Valor do acelerômetro
+            break;
+        case 'bvp':
+            $sensor_value = $row['bvp']; // Valor do BVP
+            break;
+        case 'eda':
+            $sensor_value = $row['eda']; // Valor do EDA
+            break;
+        case 'glicodex':
+            $sensor_value = $row['glicodex']; // Valor do Glicodex
+            break;
+        case 'hr':
+            $sensor_value = $row['hr']; // Valor do HR
+            break;
+        case 'ibi':
+            $sensor_value = $row['ibi']; // Valor do IBI
+            break;
+        case 'temp':
+            $sensor_value = $row['temp']; // Valor da temperatura
+            break;
+        default:
+            $sensor_value = null;
+            break;
+    }
+
+    // Adiciona o valor do sensor ao array se houver
+    if ($sensor_value !== null) {
+        $sensor_data[] = $sensor_value;
+    }
 }
 
 // Retorna os dados em formato JSON
-echo json_encode($patient_sensors_data);
+echo json_encode($sensor_data);
 
 // Fecha a conexão com o banco de dados
 $stmt->close();
