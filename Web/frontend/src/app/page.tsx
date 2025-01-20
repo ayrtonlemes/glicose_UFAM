@@ -214,7 +214,7 @@ export default function Home() {
       </Box>
 
       <Box flex={1} component={Paper} margin="2px" padding="4px" sx={{textAlign: 'left'}}>
-        <PredictBox />
+        <PredictBox loading={loading}/>
       </Box>
       <Backdrop
         sx={{

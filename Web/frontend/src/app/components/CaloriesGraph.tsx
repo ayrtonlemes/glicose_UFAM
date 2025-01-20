@@ -9,7 +9,6 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 export default function CaloriesGraphDonut() {
   const [itemNb, setItemNb] = useState(1);
   const [selectedSeries, setSelectedSeries] = useState<string[]>([]);
-  const [skipAnimation, setSkipAnimation] = useState(false);
 
   const handleItemNbChange = (event: Event, newValue: number | number[]) => {
     if (typeof newValue !== "number") {
@@ -89,24 +88,6 @@ export default function CaloriesGraphDonut() {
         width={200}  // Definindo a largura do gráfico
       />
 
-      <FormControlLabel
-        checked={skipAnimation}
-        control={<Checkbox onChange={(event) => setSkipAnimation(event.target.checked)} />}
-        label="Skip Animation"
-        labelPlacement="end"
-      />
-
-      <Typography id="input-item-number" gutterBottom>
-        Number of items
-      </Typography>
-      <Slider
-        value={itemNb}
-        onChange={handleItemNbChange}
-        valueLabelDisplay="auto"
-        min={1}
-        max={mockedCaloriesPatients.length}
-        aria-labelledby="input-item-number"
-      />
     </Box>
   );
 }

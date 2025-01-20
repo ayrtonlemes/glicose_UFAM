@@ -1,7 +1,36 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, Stack, Typography } from '@mui/material';
+import { getResultModel } from '../services/getResultModel';
 
-export default function PredictBox() {
+interface PredictBoxProps {
+  loading: boolean
+}
+
+export default function PredictBox( {loading} : PredictBoxProps) {
+
+  const [result,setResult] = useState<string | null>(null)
+  
+  const fetchResultData = async () => {
+    
+    try{
+      setResult(null);
+      loading = true;
+      const response = await getResultModel();
+      
+      console.log(response);
+      if(response) {
+        setResult(response[1])
+      }
+      else {
+        setResult("Nenhum dado encontrado");
+      }
+    }catch(error) {
+      setResult("Erro ao obter os dados:");
+      console.log(error);
+    }finally {
+      loading = false
+    }
+  }
   return (
     <Box sx={{ padding: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -44,11 +73,14 @@ export default function PredictBox() {
             textAlign: 'left',        // Garante alinhamento de texto
           }}
         >
+          <Stack sx={{flexDirection: 'row', justifyContent: 'space-between', width:'100%', marginBottom: 2}}>
           <Typography variant="h5" gutterBottom>
             Resultado:
           </Typography>
+          <Button variant="outlined" onClick={fetchResultData}>Predict glicose</Button>
+          </Stack>
           <Typography>
-            O nível de glicemia de mg/dL foi classificado como:
+            { `O nível de glicemia de ${Number(result).toFixed(3)} mg/dL foi classificado como:` || "Aguardando previsao..."}
           </Typography>
         </Box>
       </Box>

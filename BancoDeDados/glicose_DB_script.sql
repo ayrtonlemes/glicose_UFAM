@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `glicose`.`acc_data` (
   `acc_y` DOUBLE NULL DEFAULT NULL,
   `acc_z` DOUBLE NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `acc_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS `glicose`.`bvp_data` (
   `datetime` DATETIME NOT NULL,
   `bvp` DOUBLE NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `bvp_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
@@ -72,12 +72,12 @@ DEFAULT CHARACTER SET = utf8mb4;
 -- Table `glicose`.`eda_data`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `glicose`.`eda_data` (
-  `id_sec_data` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_patient` INT(10) UNSIGNED NOT NULL,
+  `id_sec_data` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_patient` INT UNSIGNED NOT NULL,
   `datetime` DATETIME NOT NULL,
   `eda` DOUBLE NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `eda_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
@@ -91,8 +91,8 @@ DEFAULT CHARACTER SET = utf8mb4;
 -- Table `glicose`.`food_data`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `glicose`.`food_data` (
-  `id_sec_data` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_patient` INT(10) UNSIGNED NOT NULL,
+  `id_sec_data` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_patient` INT UNSIGNED NOT NULL,
   `registro_date` DATE NOT NULL,
   `registro_time` TIME NOT NULL,
   `time_begin` DATETIME NULL DEFAULT NULL,
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `glicose`.`food_data` (
   `sugar` FLOAT NULL DEFAULT NULL,
   `protein` FLOAT NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `food_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
@@ -116,12 +116,12 @@ DEFAULT CHARACTER SET = utf8mb4;
 -- Table `glicose`.`glicodex_data`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `glicose`.`glicodex_data` (
-  `id_sec_data` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_patient` INT(10) UNSIGNED NOT NULL,
+  `id_sec_data` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_patient` INT UNSIGNED NOT NULL,
   `datetime` DATETIME NOT NULL,
   `value_gluco` DOUBLE NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `glicodex_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
@@ -135,12 +135,12 @@ DEFAULT CHARACTER SET = utf8mb4;
 -- Table `glicose`.`hr_data`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `glicose`.`hr_data` (
-  `id_sec_data` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_patient` INT(10) UNSIGNED NOT NULL,
+  `id_sec_data` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_patient` INT UNSIGNED NOT NULL,
   `datetime` DATETIME NOT NULL,
   `hr` DOUBLE NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `hr_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
@@ -153,12 +153,12 @@ DEFAULT CHARACTER SET = utf8mb4;
 -- Table `glicose`.`ibi_data`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `glicose`.`ibi_data` (
-  `id_sec_data` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_patient` INT(10) UNSIGNED NOT NULL,
+  `id_sec_data` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_patient` INT UNSIGNED NOT NULL,
   `datetime` DATETIME NOT NULL,
   `ibi` DOUBLE NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `ibi_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
@@ -172,12 +172,12 @@ DEFAULT CHARACTER SET = utf8mb4;
 -- Table `glicose`.`temp_data`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `glicose`.`temp_data` (
-  `id_sec_data` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_patient` INT(10) UNSIGNED NOT NULL,
+  `id_sec_data` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `id_patient` INT UNSIGNED NOT NULL,
   `datetime` DATETIME NOT NULL,
   `temp` DOUBLE NULL DEFAULT NULL,
   PRIMARY KEY (`id_sec_data`, `id_patient`),
-  INDEX `id_patient` (`id_patient` ASC) VISIBLE,
+  INDEX `id_patient` (`id_patient` ASC),
   CONSTRAINT `temp_data_ibfk_1`
     FOREIGN KEY (`id_patient`)
     REFERENCES `glicose`.`patient` (`id_patient`)
