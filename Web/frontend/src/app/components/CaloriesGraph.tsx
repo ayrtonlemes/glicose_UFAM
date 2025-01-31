@@ -1,39 +1,55 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Slider from '@mui/material/Slider';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import FormGroup from '@mui/material/FormGroup';
-import { BarChart } from '@mui/x-charts/BarChart';
-import mockedCaloriesPatients from "../mocks/patient001_food_log.json"
+import React, { useState, useRef, useEffect } from "react";
+import { Box, FormControlLabel, Checkbox, FormGroup } from "@mui/material";
+import { Doughnut } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { getPatientFoodData } from "../services/getPatientFoodData";
 
-export default function CaloriesGraphBar() {
-  const [itemNb, setItemNb] = React.useState(5); 
-  const [selectedSeries, setSelectedSeries] = React.useState<string[]>([]);
-  const [skipAnimation, setSkipAnimation] = React.useState(false);
+ChartJS.register(ArcElement, Tooltip, Legend);
 
-  const handleItemNbChange = (event: Event, newValue: number | number[]) => {
-    if (typeof newValue !== 'number') {
-      return;
+interface Props {
+  id: number;
+  dateTime: string;
+}
+
+interface SensorData {
+  calorie: number;
+  carbo: number;
+  dietary_fiber: number;
+  sugar: number;
+  protein: number;
+  total_fat: number;
+}
+
+export default function CaloriesGraphDonut({ id, dateTime }: Props) {
+  const [selectedSeries, setSelectedSeries] = useState<string[]>([]);
+  const [patientFoodLog, setPatientFoodLog] = useState<SensorData[]>([]);
+  const chartRef = useRef<any>(null);
+
+  // Buscar dados do backend
+  const fetchData = async () => {
+    try {
+      if(id && dateTime !== "") {
+        const data = await getPatientFoodData(id, dateTime);
+        setPatientFoodLog(
+          data.map((row: any) => ({
+            calorie: row.calorie || 0,
+            carbo: row.carbo || 0,
+            //dietary_fiber: row.dietary_fiber || 0,
+            sugar: row.sugar || 0,
+            protein: row.protein || 0,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados:", error);
     }
-    setItemNb(newValue);
   };
-  
 
-  const patientFoodLog = [
-    { label: "calorie", data: mockedCaloriesPatients.map((row) => row.calorie || 0) },
-    { label: "total_carb", data: mockedCaloriesPatients.map((row) => row.total_carb || 0) },
-    { label: "dietary_fiber", data: mockedCaloriesPatients.map((row) => row.dietary_fiber || 0) },
-    { label: "sugar", data: mockedCaloriesPatients.map((row) => row.sugar || 0) },
-    { label: "protein", data: mockedCaloriesPatients.map((row) => row.protein || 0) },
-    { label: "total_fat", data: mockedCaloriesPatients.map((row) => row.total_fat || 0) },
-  ].map((s) => ({
-    ...s,  
-    highlightScope: { highlight: "series", fade: "global"} as const,
-    xAxis: mockedCaloriesPatients.map((row) => row.date || ""),
-  }));
+  useEffect(() => {
+    fetchData();
+  }, [id, dateTime]);
 
+  // Alterar seleção de séries
   const handleCheckboxChange = (label: string) => {
     setSelectedSeries((prevSelected) =>
       prevSelected.includes(label)
@@ -42,60 +58,60 @@ export default function CaloriesGraphBar() {
     );
   };
 
-  const filteredSeries = patientFoodLog
-    .filter((s) => selectedSeries.includes(s.label))
-    .map((s) => ({
-      ...s,
-      data: s.data.slice(0, itemNb),
-    }));
+  // Soma acumulada para o gráfico
+  const aggregatedData = selectedSeries.map((label) => {
+    const sum = patientFoodLog.reduce((acc, row) => acc + (row[label as keyof SensorData] || 0), 0);
+    return { label, value: sum };
+  });
+
+  // Configurar os dados para o gráfico
+  const chartData = {
+    labels: aggregatedData.map((s) => s.label),
+    datasets: [
+      {
+        data: aggregatedData.map((s) => s.value),
+        backgroundColor: ["#FF6347", "#3baf9f", "#ffcd56", "#ff9f40", "#36a2eb", "#4bc0c0"], // Cores dos segmentos
+      },
+    ],
+  };
 
   return (
-    <Box sx={{ width: '100%' }}>
-    <Typography id="series-selection" gutterBottom>
-      Selecione as variáveis
-    </Typography>
-    <FormGroup>
-      {patientFoodLog.map((s) => (
-        <FormControlLabel
-          key={s.label}
-          control={
-            <Checkbox
-              checked={selectedSeries.includes(s.label)}
-              onChange={() => handleCheckboxChange(s.label)}
-            />
-          }
-          label={s.label}
-        />
-      ))}
-    </FormGroup>
-      <BarChart
-        height={300}
-        series={filteredSeries}
-        skipAnimation={skipAnimation}
-      />
-      <FormControlLabel
-        checked={skipAnimation}
-        control={
-          <Checkbox
-            onChange={(event) => setSkipAnimation(event.target.checked)}
+    <Box sx={{ width: "100%", maxWidth: 600, margin: "auto", overflow: "hidden" }}>
+      <FormGroup sx={{ flexDirection: "row", justifyContent: "flex-start", flexWrap: "wrap" }}>
+        {Object.keys(patientFoodLog[0] || {}).map((label) => (
+          <FormControlLabel
+            key={label}
+            control={
+              <Checkbox
+                checked={selectedSeries.includes(label)}
+                onChange={() => handleCheckboxChange(label)}
+              />
+            }
+            label={label}
           />
-        }
-        label="Skip Animation"
-        labelPlacement="end"
-      />
-      <Typography id="input-item-number" gutterBottom>
-        Number of items
-      </Typography>
-      <Slider
-        value={itemNb}
-        onChange={handleItemNbChange}
-        valueLabelDisplay="auto"
-        min={1}
-        max={mockedCaloriesPatients.length}
-        aria-labelledby="input-item-number"
-      />
+        ))}
+      </FormGroup>
+
+      <Box sx={{ width: "100%", height: "300px", maxWidth: "500px", margin: "auto", overflow: "hidden" }}>
+        <Doughnut
+          ref={chartRef}
+          data={chartData}
+          options={{
+            responsive: true,
+            plugins: {
+              legend: {
+                position: "top" as const,
+              },
+              tooltip: {
+                callbacks: {
+                  label: (tooltipItem) =>
+                    `${tooltipItem.label}: ${tooltipItem.raw}`, // Exibe valor acumulado no tooltip
+                },
+              },
+            },
+          }}
+        />
+      </Box>
     </Box>
   );
 }
-
-

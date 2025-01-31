@@ -1,18 +1,7 @@
-import React, { useState, useEffect } from "react";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import React from "react";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { getPatientSensors } from "../services/getPatientSensors";
-import { SensorsProps, TypeSensorsProps } from "../types/sensors";
-import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box } from "@mui/material";
 
 ChartJS.register(
   CategoryScale,
@@ -24,83 +13,32 @@ ChartJS.register(
   Legend
 );
 
-interface SelectedSensorProps {
-  selectedSensor: TypeSensorsProps;
-  selectedPatient: string;
+interface LineGraphProps {
+  selectedSensor: { typeSensor: string }; // O nome do sensor
+  data: number[]; // Dados do sensor (vetor de números)
 }
 
-const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => {
-  const pid = Number(selectedPatient);
-  const [sensorsData, setSensorsData] = useState<SensorsProps[] | undefined>(undefined);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
-  const [uniqueDates, setUniqueDates] = useState<string[]>([]);
-
-  useEffect(() => {
-    // Carregar dados de sensores apenas quando selectedPatient mudar
-    setLoading(true);
-    getPatientSensors(selectedPatient)
-      .then((data) => {
-        setSensorsData(data);
+const LineGraph: React.FC<LineGraphProps> = ({ selectedSensor, data }) => {
+  // Se os dados estiverem vazios, exibe uma mensagem de erro ou vazio
   
-        const dates = Array.from(new Set(data.map((item) => item.registro_date)));
-        setUniqueDates(dates);
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar os dados dos sensores:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [selectedPatient]); // Recarregar os dados quando selectedPatient mudar
-
-  if (loading) {
-    return <div>Carregando ... </div>;
+  if (!data || data.length === 0) {
+    return <div>Sem dados para exibir no gráfico.</div>;
   }
 
-  if (!sensorsData || sensorsData.length === 0) {
-    return <div>Sem dados disponíveis para este paciente.</div>;
-  }
+  // Mapear os dados para o formato necessário pelo Chart.js
+  const labels = data.map((_, index) => `${index + 1}`); // Criar labels como 1, 2, 3,... para os dados
 
-  // Filtrar dados com base na data selecionada
-  const filteredData = selectedDate
-    ? sensorsData.filter((item) => item.registro_date === selectedDate)
-    : sensorsData;
-
-  let sensorValues: any[] = [];
-  let labels: any[] = [];
-
-  if (selectedSensor.typeSensor === "HR") {
-    sensorValues = filteredData.map((item) => item.ibi); // Ajuste conforme o campo correto de HR
-    labels = filteredData.map((item) => item.registro_time);
-  } else if (selectedSensor.typeSensor === "IBI") {
-    sensorValues = filteredData.map((item) => item.ibi); // Acessa os dados de IBI
-    labels = filteredData.map((item) => item.registro_time);
-  } else if (selectedSensor.typeSensor === "BVP") {
-    sensorValues = filteredData.map((item) => item.bvp); // Acessa os dados de BVP
-    labels = filteredData.map((item) => item.registro_time);
-  } else if(selectedSensor.typeSensor === "EDA") {
-    sensorValues = filteredData.map((item) => item.eda);
-    labels = filteredData.map((item) => item.registro_time);
-  }
-
-  const data = {
+  // Configurações do gráfico
+  const chartData = {
     labels: labels,
     datasets: [
       {
-        label: //da pra colocar esse texto padrao no sensorValues
-          selectedSensor.typeSensor === "HR"
-            ? "HR (BPM)" //tambem fazer para unidades
-            : selectedSensor.typeSensor === "IBI"
-            ? "IBI"
-            : selectedSensor.typeSensor === "EDA" 
-            ? "EDA(mS)"
-            : "BVP (hg_mm)", 
-        data: sensorValues,
-        borderColor: "rgba(75,192,192,1)",
-        backgroundColor: "rgba(75,192,192,0.2)",
-        pointRadius: 2,
-        tension: 0.4,
+        label: selectedSensor.typeSensor, // Nome do sensor como label
+        data: data, // Dados do sensor
+        borderColor: "rgba(75,192,192,1)", // Cor da linha
+        backgroundColor: "rgba(75,192,192,0.2)", // Cor de fundo
+        pointRadius: 3, // Raio do ponto no gráfico
+        tension: 0.4, // Curvatura da linha
       },
     ],
   };
@@ -113,58 +51,30 @@ const LineGraph = ({ selectedSensor, selectedPatient }: SelectedSensorProps) => 
       },
       title: {
         display: true,
-        text:
-          selectedSensor.typeSensor === "HR"
-            ? "Heart Rate Over Time"
-            : selectedSensor.typeSensor === "IBI"
-            ? "Interval Between InnerBeats"
-            : selectedSensor.typeSensor === "EDA"
-            ? "ElectroDermal Activity"
-            : "Blood Volume Pulse",
+        text: "Valores do Sensor ao Longo do Tempo", // Título do gráfico
       },
     },
     scales: {
       x: {
         title: {
           display: true,
-          text: "Time (HH:mm:ss)",
+          text: "Índice dos Dados", // Título do eixo X (com base no índice dos dados)
         },
       },
       y: {
         title: {
           display: true,
-          text:
-            selectedSensor.typeSensor === "HR"
-              ? "Heart Rate (BPM)"
-              : selectedSensor.typeSensor === "IBI"
-              ? "IBI(s)"
-              : selectedSensor.typeSensor === "EDA"
-              ? "ElectroDermal Activity(uS)"
-              :"Blood Volume Pulse (hg_mm)",
+          text: "Valor do Sensor", // Título do eixo Y
         },
-        min: selectedSensor.min, // Ajuste conforme necessário
-        max: selectedSensor.max, // Ajuste conforme necessário
+        min: Math.min(...data) - Math.min(...data)/2, // Valor mínimo no eixo Y
+        max: Math.max(...data) + Math.min(...data)/2, // Valor máximo no eixo Y
       },
     },
   };
 
   return (
-    <Box>
-      <FormControl fullWidth>
-        <InputLabel>Selecione a Data</InputLabel>
-        <Select
-          value={selectedDate || ""}
-          onChange={(e) => setSelectedDate(e.target.value)}
-          label="Selecione a Data"
-        >
-          {uniqueDates.map((date) => (
-            <MenuItem key={date} value={date}>
-              {date}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Line data={data} options={options} />
+    <Box sx={{ width: "100%" }}>
+      <Line data={chartData} options={options} />
     </Box>
   );
 };

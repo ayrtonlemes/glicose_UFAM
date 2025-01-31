@@ -107,7 +107,7 @@ export default function Navbar() {
                 textDecoration: 'none',
               }}
             >
-              MyLogo
+              GlicoseDB
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
               {navItems.map((page) => (

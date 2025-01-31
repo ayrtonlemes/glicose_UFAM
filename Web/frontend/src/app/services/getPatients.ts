@@ -2,8 +2,10 @@ import { PatientInfoProps } from "../types/patient";
 
 
 export const getAllPatients = async (): Promise<PatientInfoProps[]> => {
+  const serverIp = process.env.NEXT_PUBLIC_IP_SERVER;
+  const port = process.env.NEXT_PUBLIC_PORT;
   try {
-    const response = await fetch("http://localhost:80/get_patient_list.php");
+    const response = await fetch(`http://${serverIp}/get_patient_list.php`);
     if (!response.ok) {
       throw new Error("Erro ao fetch de todos os pacientes.");
     }
