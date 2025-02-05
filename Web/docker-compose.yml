@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   frontend:
     build:
@@ -7,7 +9,8 @@ services:
       - "3000:3000"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - /app/node_modules  # Evita sobrescrever node_modules
     environment:
       - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Garante que o watch detecta mudanças nos arquivos
     command: npm run dev -- -H 0.0.0.0 -p 3000

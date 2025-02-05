@@ -16,13 +16,17 @@ ChartJS.register(
 interface LineGraphProps {
   selectedSensor: { typeSensor: string }; // O nome do sensor
   data: number[]; // Dados do sensor (vetor de números)
+  dateTime: string;
 }
 
-const LineGraph: React.FC<LineGraphProps> = ({ selectedSensor, data }) => {
+const LineGraph: React.FC<LineGraphProps> = ({ selectedSensor, data , dateTime}) => {
   // Se os dados estiverem vazios, exibe uma mensagem de erro ou vazio
   
   if (!data || data.length === 0) {
-    return <div>Sem dados para exibir no gráfico.</div>;
+    return <div>No data to show on graph.</div>;
+  }
+  if(!dateTime || dateTime === '') {
+    return <div>Select a day before select a day</div>
   }
 
   // Mapear os dados para o formato necessário pelo Chart.js

@@ -1,6 +1,6 @@
 <?php
 // Defina as credenciais do banco de dados
-$servername = "localhost"; // ou o endereço do seu servidor MySQL
+$servername = "26.161.62.200"; // ou o endereço do seu servidor MySQL
 $username = "root"; // seu usuário do banco
 $password = ""; // sua senha do banco
 $dbname = "glicose"; // nome do seu banco de dados
@@ -26,8 +26,9 @@ if ($conn->connect_error) {
     die("Falha na conexão: " . $conn->connect_error);
 }
 
+
 // Prepara a consulta SQL com o id do paciente
-$sql = "SELECT * FROM patient WHERE id_patient = ?";
+$sql = "SELECT datetime FROM glicodex_data WHERE id_patient = ?";
 $stmt = $conn->prepare($sql);
 
 // Verifica se a preparação da consulta foi bem-sucedida
@@ -46,15 +47,15 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 // Cria um array para armazenar os dados
-$patient_list = array();
+$patient_datetime_data = array();
 
 // Verifica se há resultados e os armazena no array
 while ($row = $result->fetch_assoc()) {
-    $patient_list[] = $row;
+    $patient_datetime_data[] = $row;
 }
 
 // Retorna os dados em formato JSON
-echo json_encode($patient_list);
+echo json_encode($patient_datetime_data);
 
 // Fecha a conexão com o banco de dados
 $stmt->close();

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Typography, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Paper, Backdrop, CircularProgress } from "@mui/material";
+import { Box, Typography, FormControl, IconButton, InputLabel, MenuItem, Select, SelectChangeEvent, Paper, Backdrop, CircularProgress, Stack, Modal } from "@mui/material";
 import { sensorConfigs } from "@/app/types/sensors";
 import { getAllPatients } from "./services/getPatients";
 import { getDatetime } from "./services/getDatetime";
@@ -9,6 +9,9 @@ import LineGraph from "@/app/components/LineGraph";
 import CaloriesGraphBar from "@/app/components/CaloriesGraph";
 import PredictBox from "./components/PredictBox";
 import { getPatientSensors } from "./services/getPatientSensors";
+import { Alarm } from "@mui/icons-material";
+import GlucoseModal from "./components/DatetimeModal";
+import { getAllDatetimePatient } from "./services/getAllDatetimePatient";
 
 interface PatientDataProps {
   id_patient: number;
@@ -24,11 +27,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSensor, setSelectedSensor] = useState<string | undefined>('');
   const [selectedPatient, setSelectedPatient] = useState<string | undefined>('');
-  const [selectedDate, setSelectedDate] = useState<string | undefined>('');
-  const [datetimeRange, setDatetimeRange] = useState<string[]>([]);
-  const [minNav, setMinNav] = useState<number>(0);
-  const [maxNav, setMaxNav] = useState<number>(20);
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [datetimeRange, setDatetimeRange] = useState<string[]>([]); //apagar
+  const [datetimeList, setDatetimeList] = useState<string[]>([]);
+  const [minNav, setMinNav] = useState<number>(0); //apagar
+  const [maxNav, setMaxNav] = useState<number>(20); //apagar
   const [sensorData, setSensorData] = useState<number[]>([]);
+  const [open, setOpen] = useState<boolean>(false);
   const allSensors = sensorConfigs;
 
   const fetchPatients = useCallback(async () => {
@@ -64,6 +69,26 @@ export default function Home() {
     }
   }, []);
 
+  const fetchDatetimes = useCallback(async (id_patient: number) => {
+    try {
+      setLoading(true)
+      //set message of loading datetimes..maybe..
+      const data = await getAllDatetimePatient(id_patient);
+      if(data && data.length > 0) {
+        const allDates = data.map((item: {datetime: string}) => item.datetime)
+        setDatetimeList(allDates);
+        console.log("Atualizado todos os datetimes do paciente.")
+      } else {
+        setDatetimeList([]);
+      } 
+    } catch(err) {
+      setError("Erro ao carregar todos os datetimes");
+      console.log(err)
+    } finally {
+      setLoading(false);
+    }
+  }, [])
+
   const fetchSensorsData = useCallback(async (id_patient: number, selectedSensor: string, dateTime: string) => {
     try {
       setLoading(true);
@@ -80,13 +105,16 @@ export default function Home() {
     }
   }, [])
 
-  const handleDatetimeChange = (direction: 'next' | 'prev') => {
-    const step = 20;
-    const newMin = direction === 'next' ? minNav + step : Math.max(0, minNav - step);
-    setMinNav(newMin);
-    fetchDatetimeRange(patientData?.id_patient ?? 0, newMin, step);
-  };
 
+  const handleConfirm = (dateTime) => {
+    if(dateTime) {
+      setSelectedDate(dateTime);
+      console.log("Recebido e armazenado:",dateTime);
+    }
+    else {
+      console.log("NAO FOI RECEBIDO O DATETIME!!!!");
+    }
+  }
   const handlePatientChange = (event: SelectChangeEvent) => {
     const selectedName = event.target.value as string;
     setSelectedPatient(selectedName);
@@ -114,6 +142,13 @@ export default function Home() {
       }
     }
   }, [selectedPatient, selectedSensor, selectedDate, fetchSensorsData]);
+  
+  useEffect(() => {
+    if(patientData) {
+      fetchDatetimes(patientData?.id_patient)
+    }
+  },[patientData]);
+
   //if (loading) return <Typography>Carregando dados...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
@@ -122,7 +157,7 @@ export default function Home() {
 
     <Box padding={3}>
       <FormControl sx={{ m: 1, minWidth: 300 }}>
-        <InputLabel id="patient-selector-label">Selecione um paciente</InputLabel>
+        <InputLabel id="patient-selector-label">Select a patient</InputLabel>
         <Select
           labelId="patient-selector-label"
           value={selectedPatient ?? ''}
@@ -136,43 +171,11 @@ export default function Home() {
               ))
             : (
                 <MenuItem value="" disabled>
-                  Não há pacientes cadastrados.
+                  No patients found.
                 </MenuItem>
               )}
         </Select>
       </FormControl>
-
-      {datetimeRange.length > 0 && (
-        <Box marginBottom={4}>
-          <Typography variant="h6">Selecione um horário:</Typography>
-          <Box display="flex" gap={2} overflow="auto">
-            {datetimeRange.map((date, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedDate(date)}
-                style={{
-                  padding: "10px 15px",
-                  borderRadius: "5px",
-                  backgroundColor: selectedDate === date ? "#1976d2" : "#f0f0f0",
-                  color: selectedDate === date ? "#fff" : "#000",
-                  cursor: "pointer",
-                }}
-              >
-                {new Date(date).toLocaleString()}
-              </button>
-            ))}
-          </Box>
-        </Box>
-      )}
-
-      <Box display="flex" justifyContent="space-between">
-        <button onClick={() => handleDatetimeChange('prev')} disabled={minNav === 0}>
-          Anterior
-        </button>
-        <button onClick={() => handleDatetimeChange('next')}>
-          Próximo
-        </button>
-      </Box>
 
       {/* Sensores e gráficos */}
       <Box
@@ -184,10 +187,11 @@ export default function Home() {
       >
         <Box flex={1} component={Paper} padding="2px">
           <Typography variant="h6" gutterBottom>
-            Dados de sensores cardíacos
+           Heart Sensor Data
           </Typography>
-          <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="sensor-select-label">Escolha o sensor</InputLabel>
+          <Box sx={{display:"flex", justifyContent: "space-between" }}>
+          <FormControl sx={{ m: 1, minWidth: 150 }}>
+            <InputLabel id="sensor-select-label">Select a sensor</InputLabel>
             <Select
               labelId="sensor-select-label"
               value={selectedSensor}
@@ -200,18 +204,24 @@ export default function Home() {
               ))}
             </Select>
           </FormControl>
+          <IconButton color="secondary" aria-label="add an alarm" sx={{mr:5}} onClick={() => setOpen(true)}>
+            <Alarm />
+          </IconButton>
+
+          </Box>
 
           {selectedSensor && patientData && (
             <LineGraph
               selectedSensor={sensorConfigs[selectedSensor]}
               data={sensorData}
+              dateTime={selectedDate}
             />
           )}
         </Box>
 
         <Box flex={1} component={Paper} padding="2px">
           <Typography variant="h6" gutterBottom>
-            Registro Alimentar
+            Food Data
           </Typography>
           <CaloriesGraphBar id={patientData? patientData.id_patient : 0} dateTime={selectedDate? selectedDate : ""}/>
         </Box>
@@ -229,6 +239,8 @@ export default function Home() {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
+      {patientData? <GlucoseModal open={open} handleClose={() => setOpen(false)} glucoseReadings={datetimeList} onConfirm={handleConfirm}></GlucoseModal> : <></>}
     </Box>
+
   );
 }
