@@ -1,6 +1,6 @@
 <?php
 // Defina as credenciais do banco de dados
-$servername = "localhost"; // ou o endereço do seu servidor MySQL
+$servername = "10.224.1.56"; // ou o endereço do seu servidor MySQL
 $username = "root"; // seu usuário do banco
 $password = ""; // sua senha do banco
 $dbname = "glicose"; // nome do seu banco de dados
@@ -11,7 +11,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 
 // Verifica se o id foi passado via GET ou POST
 $id_patient = isset($_GET['id']) ? $_GET['id'] : null; // Usando GET, pode usar POST dependendo da sua implementação
-$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20; // Tamanho do datetime carregado para a página
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 40; // Tamanho do datetime carregado para a página
 $min = isset($_GET['min']) ? (int)$_GET['min'] : 0; // Posição inicial dos resultados
 
 // Verifica se o id_patient foi fornecido

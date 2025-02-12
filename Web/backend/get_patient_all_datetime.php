@@ -1,6 +1,6 @@
 <?php
 // Defina as credenciais do banco de dados
-$servername = "26.161.62.200"; // ou o endereço do seu servidor MySQL
+$servername = "10.224.1.56"; // ou o endereço do seu servidor MySQL
 $username = "root"; // seu usuário do banco
 $password = ""; // sua senha do banco
 $dbname = "glicose"; // nome do seu banco de dados

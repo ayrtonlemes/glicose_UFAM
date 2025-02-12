@@ -1,5 +1,4 @@
-#!C:\Users\ALUNO\anaconda3\envs\glicose_squad\python.exe
-
+import time
 import argparse
 import mysql.connector
 import pandas as pd
@@ -79,7 +78,7 @@ try:
 
         if len(ibi_subset) > 0:
             rr_intervals = ibi_subset['ibi'].values * 1000  # Converter de segundos para milissegundos
-            if len(rr_intervals) >= 226:  # Critério mínimo de duração
+            if len(rr_intervals) >= 100:  # Critério mínimo de duração
 
                 # Cálculo de métricas
                 sdnn = np.std(rr_intervals)
@@ -175,7 +174,7 @@ try:
     print(results_df)
 
     # Configuração do caminho para salvar o CSV com todas as métricas e previsões
-    output_directory = "resultados"
+    output_directory = r"C:\xampp\htdocs\Sistema-Dashboard-Glicose\glicose_super\resultados"
     output_file = "resultados_com_metricas_previsao.csv"
     output_path = os.path.join(output_directory, output_file)
 
@@ -200,11 +199,7 @@ try:
     if not predictions_df.empty:
         predictions_df.to_csv(output_path_predictions, index=False)
         print(f"Predições com datetimes salvas com sucesso em: {output_path_predictions}")
-        #print("glicodex",glicodex_data['datetime'])
-        #print(ibi_data['datetime'])
-        #print(hr_data['datetime'])
 
-        #print()
     else:
         print("Nenhuma predição para salvar.")
 

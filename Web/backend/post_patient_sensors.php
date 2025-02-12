@@ -23,11 +23,11 @@ var_dump($data);
 // Acessa os dados do JSON
 $sensor_type = isset($data['sensor']) ? $data['sensor'] : null;
 $datetime = isset($data['datetime']) ? $data['datetime'] : null;
-$sensor_data = isset($data['sensor_type']) ? $data['sensor_type'] : null;
+$ibi_values = isset($data['ibi']) && is_array($data['ibi']) ? $data['ibi'] : null; // Array de valores IBI
 $id_patient = isset($data['id_patient']) ? $data['id_patient'] : null;
 
 // Verifica se todos os parâmetros obrigatórios foram fornecidos
-if ($sensor_type === null || $datetime === null || $sensor_data === null || $id_patient === null) {
+if ($sensor_type === null || $datetime === null || $ibi_values === null || $id_patient === null) {
     echo json_encode(['error' => 'Parâmetros insuficientes.']);
     exit;
 }
@@ -40,73 +40,43 @@ if ($conn->connect_error) {
     die(json_encode(['error' => "Falha na conexão: " . $conn->connect_error]));
 }
 
+// Verifica se o id_patient existe na tabela patient
+$check_patient_sql = "SELECT id_patient FROM patient WHERE id_patient = ?";
+$check_patient_stmt = $conn->prepare($check_patient_sql);
+$check_patient_stmt->bind_param("i", $id_patient); // "i" indica que o valor é um inteiro
+$check_patient_stmt->execute();
+$check_patient_result = $check_patient_stmt->get_result();
+
+if ($check_patient_result->num_rows === 0) {
+    echo json_encode(['error' => 'Paciente não encontrado.']);
+    exit;
+}
+
 // Define a tabela com base no tipo de sensor
-switch ($sensor_type) {
-    case 'acc':
-        $table = 'acc_data';
-        break;
-    case 'bvp':
-        $table = 'bvp_data';
-        break;
-    case 'eda':
-        $table = 'eda_data';
-        break;
-    case 'glicodex':
-        $table = 'glicodex_data';
-        break;
-    case 'hr':
-        $table = 'hr_data';
-        break;
-    case 'ibi':
-        $table = 'ibi_data';
-        break;
-    case 'temp':
-        $table = 'temp_data';
-        break;
-    default:
-        echo json_encode(['error' => 'Tipo de sensor inválido.']);
+if ($sensor_type !== 'ibi') {
+    echo json_encode(['error' => 'Tipo de sensor inválido para esta tabela.']);
+    exit;
+}
+
+// Prepara a consulta SQL para inserção na tabela ibi_data
+$sql = "INSERT INTO ibi_data (id_patient, datetime, ibi) VALUES (?, ?, ?)";
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    echo json_encode(['error' => 'Erro ao preparar a consulta: ' . $conn->error]);
+    exit;
+}
+
+// Itera sobre o array de valores IBI e insere cada um no banco de dados
+foreach ($ibi_values as $ibi) {
+    $stmt->bind_param("isd", $id_patient, $datetime, $ibi); // "isd" (inteiro, string, double)
+    if (!$stmt->execute()) {
+        echo json_encode(['error' => 'Falha ao inserir os dados.', 'details' => $stmt->error]);
         exit;
+    }
 }
 
-// Prepara a consulta SQL para inserção com base no tipo de sensor
-$sql = "";
-$stmt = null;
-
-switch ($sensor_type) {
-    case 'acc':
-        $sql = "INSERT INTO $table (id_patient, datetime, acc_x, acc_y, acc_z) VALUES (?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param(
-            "issdd",
-            $id_patient,
-            $datetime,
-            $sensor_data['acc']['acc_x'], // Agora acessando os dados de acc_x, acc_y, acc_z corretamente
-            $sensor_data['acc']['acc_y'],
-            $sensor_data['acc']['acc_z']
-        );
-        break;
-    case 'bvp':
-    case 'eda':
-    case 'glicodex':
-    case 'hr':
-    case 'ibi':
-    case 'temp':
-        $column = $sensor_type; // A coluna tem o mesmo nome do sensor
-        $sql = "INSERT INTO $table (id_patient, datetime, $column) VALUES (?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("isd", $id_patient, $datetime, $sensor_data[$sensor_type]); // Agora usando o valor correto
-        break;
-    default:
-        echo json_encode(['error' => 'Erro ao configurar consulta.']);
-        exit;
-}
-
-// Executa a consulta
-if ($stmt && $stmt->execute()) {
-    echo json_encode(['success' => 'Dados inseridos com sucesso.']);
-} else {
-    echo json_encode(['error' => 'Falha ao inserir os dados.', 'details' => $stmt->error]);
-}
+echo json_encode(['success' => 'Dados inseridos com sucesso.']);
 
 // Fecha a conexão
 $stmt->close();
