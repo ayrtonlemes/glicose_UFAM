@@ -30,4 +30,3 @@ export const getAllPatients = async (): Promise<PatientInfoProps[]> => {
   }
 };
 
-

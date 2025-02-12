@@ -16,13 +16,17 @@ ChartJS.register(
 interface LineGraphProps {
   selectedSensor: { typeSensor: string }; // O nome do sensor
   data: number[]; // Dados do sensor (vetor de números)
+  dateTime: string;
 }
 
-const LineGraph: React.FC<LineGraphProps> = ({ selectedSensor, data }) => {
+const LineGraph: React.FC<LineGraphProps> = ({ selectedSensor, data , dateTime}) => {
   // Se os dados estiverem vazios, exibe uma mensagem de erro ou vazio
   
   if (!data || data.length === 0) {
-    return <div>Sem dados para exibir no gráfico.</div>;
+    return <div>No data to show on graph.</div>;
+  }
+  if(!dateTime || dateTime === '') {
+    return <div>Select a day before select a day</div>
   }
 
   // Mapear os dados para o formato necessário pelo Chart.js
@@ -37,7 +41,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ selectedSensor, data }) => {
         data: data, // Dados do sensor
         borderColor: "rgba(75,192,192,1)", // Cor da linha
         backgroundColor: "rgba(75,192,192,0.2)", // Cor de fundo
-        pointRadius: 3, // Raio do ponto no gráfico
+        pointRadius: 0, // Raio do ponto no gráfico
         tension: 0.4, // Curvatura da linha
       },
     ],
@@ -51,20 +55,20 @@ const LineGraph: React.FC<LineGraphProps> = ({ selectedSensor, data }) => {
       },
       title: {
         display: true,
-        text: "Valores do Sensor ao Longo do Tempo", // Título do gráfico
+        text: "Sensor Values ​​Over Time", // Título do gráfico
       },
     },
     scales: {
       x: {
         title: {
           display: true,
-          text: "Índice dos Dados", // Título do eixo X (com base no índice dos dados)
+          text: "Data Index", // Título do eixo X (com base no índice dos dados)
         },
       },
       y: {
         title: {
           display: true,
-          text: "Valor do Sensor", // Título do eixo Y
+          text: "Sensor Value", // Título do eixo Y
         },
         min: Math.min(...data) - Math.min(...data)/2, // Valor mínimo no eixo Y
         max: Math.max(...data) + Math.min(...data)/2, // Valor máximo no eixo Y

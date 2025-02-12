@@ -17,8 +17,8 @@ import Link from 'next/link';
 export default function Navbar() {
 
   const navItems = [
-    { name: "Início", path: "/" },
-    { name: "Pacientes", path: "/patients" },
+    { name: "Home", path: "/" },
+    { name: "Patients", path: "/patients" },
   ];
 
   const pages = ['Inicio', 'Pacientes', 'Blog'];
